@@ -1,0 +1,5 @@
+.cache
+logs*/
+__pycache__/
+*.out
+*.o*
