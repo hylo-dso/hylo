@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# Wait for prelog to finish
+# Wait for prolog to finish
 echo "Wait 3s..."
 sleep 3
 echo "done"
 
-PRELOAD="singularity exec --bind $SCRATCH/hylo:$HOME,$SCRATCH/kaggle_3m --nv $SCRATCH/hylo-box "
+PRELOAD="singularity exec --bind $SCRATCH/hylo:$HOME,$SCRATCH/kaggle_3m --nv artifact_init.sif "
 
 # Args of training script
 CMD="main-dist-segmentation.py --data-dir $SCRATCH/kaggle_3m/ --freq 200  --dataset brain-segmentation --batch-size 16 --model unet --epochs 50 --warmup-epochs 10 --milestone 100 --lr 0.0008 --lr-decay 1 --damping 0.03 --target-damping 0.03 --weight-decay 0.0001 --nproc-per-node 4 --adaptive 10 50 100 $@"

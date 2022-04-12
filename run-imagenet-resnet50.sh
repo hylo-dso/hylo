@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# Wait for prelog to finish
+# Wait for prolog to finish
 echo "Wait 3s..."
 sleep 3
 echo "done"
 
-PRELOAD="singularity exec --bind $SCRATCH/hylo:$HOME,$SCRATCH/imagenet --nv $SCRATCH/hylo-box "
+PRELOAD="singularity exec --bind $SCRATCH/hylo:$HOME,$SCRATCH/imagenet --nv artifact_init.sif "
 
 # Args of training script
 CMD="main-dist-classification.py --data-dir $SCRATCH/imagenet --freq 6400  --dataset imagenet --batch-size 80 --model resnet50 --epochs 55 --milestone 25 30 35 40 45 --lr 1 --lr-decay 0.1 --damping 2 --target-damping 0.02 --weight-decay 0.00001 --checkpoint-freq 1 --adaptive 10 25 30 $@"
