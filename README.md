@@ -7,10 +7,15 @@ git clone https://github.com/hylo-dso/hylo.git
 cd hylo
 ```
 
-1. **Download singularity image from [Sylabs](https://cloud.sylabs.io/)**
-```
-singularity pull --arch ppc64le library://hylo/dso/artifact:init
-```
+1. **Download singularity image from [Sylabs](https://cloud.sylabs.io/)** (Sylabs account required)
+ * if you have not login to singularity on the system, generate a token on Sylabs, after running the command below, paste it to the command line interface
+    ```
+    singularity remote login
+    ```
+ * pull the singularity image from remote
+    ```
+    singularity pull --arch ppc64le library://hylo/dso/artifact:init
+    ```
 
 2. **Download datasets** (if datasets are not available locally)
   * [ImageNet-1k](https://image-net.org/download.php) (ImageNet account required)
