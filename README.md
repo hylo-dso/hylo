@@ -60,6 +60,12 @@ cd hylo
         run-brain-unet.sh --world-size 4 --log-dir logs-brain-unet
       ```
 
+5. **Analysis**
+* To enable analysis, modify the traing config scripts as below
+  * for profiling, add ```--profiling True```
+  * for gradient norm analysis, add ```--grad-norm True```
+  * for rank analysis, add ```--rank-analysis True```
+
 ## Requirements
 ```
 pytorch==1.7.1
