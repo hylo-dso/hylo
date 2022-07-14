@@ -1,0 +1,9 @@
+*.csv
+*.out
+*.o*
+*.jpg
+*.png
+*.txt
+*.cache
+**/__pycache__
+logs-*
