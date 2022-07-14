@@ -117,7 +117,8 @@ def test(epoch, model, loss_fn, test_loader, backend, verbose):
                 t.update(1)
                 if idx + 1 == len(test_loader):
                     mean_dsc = np.mean(dsc_per_volume(validation_pred, validation_true, test_loader.dataset.patient_slice_index,))
-                    print("epoch {}, val_loss: {:.4f}, val_mean_dsc_value: {:.4f}".format(epoch, test_loss.avg, mean_dsc))
+                    if int(os.environ['RANK']) == 0:
+                        print("epoch {}, val_loss: {:.4f}, val_mean_dsc_value: {:.4f}".format(epoch, test_loss.avg, mean_dsc))
 
     return test_loss, mean_dsc
 
