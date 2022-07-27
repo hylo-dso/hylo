@@ -1,5 +1,7 @@
 # A Hybrid Low-Rank Natural Gradient Descent Method (HyLo)
 
+[![DOI](https://zenodo.org/badge/480583302.svg)](https://zenodo.org/badge/latestdoi/480583302)
+
 ## Get Started
 
 0. **Clone this repository**
