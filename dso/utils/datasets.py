@@ -37,6 +37,28 @@ def get_dataset(dataset, data_dir, batch_size, world_size, rank, local_rank):
 			root=data_dir, train=False, download=download, transform=transform_test)
 
 		if download: dist.barrier()
+	elif dataset == 'cifar100':
+                transform_train = transforms.Compose([
+                    transforms.RandomCrop(32, padding=4),
+                    transforms.RandomHorizontalFlip(),
+                    transforms.ToTensor(),
+                    transforms.Normalize((0.5071, 0.4867, 0.4408), (0.2675, 0.2565, 0.2761))])
+
+                transform_test = transforms.Compose([
+                    transforms.ToTensor(),
+                    transforms.Normalize((0.5071, 0.4867, 0.4408), (0.2675, 0.2565, 0.2761))])
+
+                os.makedirs(data_dir, exist_ok=True)
+
+                download = True if local_rank == 0 else False
+                if not download: dist.barrier()
+                
+                train_dataset = datasets.CIFAR100(
+                        root=data_dir, train=True, download=download, transform=transform_train)
+                test_dataset = datasets.CIFAR100(
+                        root=data_dir, train=False, download=download, transform=transform_test)
+                
+                if download: dist.barrier()
 	elif dataset == 'imagenet':
 		train_dataset = datasets.ImageFolder(
 			data_dir + '/train',
