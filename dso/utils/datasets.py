@@ -15,41 +15,57 @@ from skimage.transform import resize
 from skimage.transform import rescale, rotate
 
 def get_dataset(dataset, data_dir, batch_size, world_size, rank, local_rank):
-	if dataset == 'cifar10':
-		transform_train = transforms.Compose([
-			transforms.RandomCrop(32, padding=4),
+        if dataset == 'fashion-mnist':
+                transform_train = transforms.Compose([
+                        transforms.ToTensor(),
+                        transforms.Normalize((0.2862,), (0.3529,))])
+
+                transform_test = transforms.Compose([
+                        transforms.ToTensor(),
+                        transforms.Normalize((0.2862,), (0.3529,))])
+
+                os.makedirs(data_dir, exist_ok=True)
+
+                download = True if local_rank == 0 else False
+                if not download: dist.barrier()
+
+                train_dataset = datasets.FashionMNIST(root=data_dir, train=True, download=True, transform=transform_train)
+                test_dataset = datasets.FashionMNIST(root=data_dir, train=False, download=True, transform=transform_test)
+
+                if download: dist.barrier()
+        elif dataset == 'cifar10':
+                transform_train = transforms.Compose([
+                        transforms.RandomCrop(32, padding=4),
 			transforms.RandomHorizontalFlip(),
 			transforms.ToTensor(),
 			transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))])
-
-		transform_test = transforms.Compose([
-			transforms.ToTensor(),
-			transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))])
-
-		os.makedirs(data_dir, exist_ok=True)
-
-		download = True if local_rank == 0 else False
-		if not download: dist.barrier()
-
-		train_dataset = datasets.CIFAR10(
-			root=data_dir, train=True, download=download, transform=transform_train)
-		test_dataset = datasets.CIFAR10(
-			root=data_dir, train=False, download=download, transform=transform_test)
-
-		if download: dist.barrier()
-	elif dataset == 'cifar100':
+                
+                transform_test = transforms.Compose([
+                        transforms.ToTensor(),
+                        transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))])
+                
+                os.makedirs(data_dir, exist_ok=True)
+                
+                download = True if local_rank == 0 else False
+                if not download: dist.barrier()
+                
+                train_dataset = datasets.CIFAR10(root=data_dir, train=True, download=download, transform=transform_train)
+                test_dataset = datasets.CIFAR10(root=data_dir, train=False, download=download, transform=transform_test)
+                
+                if download: dist.barrier()
+        elif dataset == 'cifar100':
                 transform_train = transforms.Compose([
                     transforms.RandomCrop(32, padding=4),
                     transforms.RandomHorizontalFlip(),
                     transforms.ToTensor(),
                     transforms.Normalize((0.5071, 0.4867, 0.4408), (0.2675, 0.2565, 0.2761))])
-
+                
                 transform_test = transforms.Compose([
                     transforms.ToTensor(),
                     transforms.Normalize((0.5071, 0.4867, 0.4408), (0.2675, 0.2565, 0.2761))])
-
+                
                 os.makedirs(data_dir, exist_ok=True)
-
+                
                 download = True if local_rank == 0 else False
                 if not download: dist.barrier()
                 
@@ -59,31 +75,29 @@ def get_dataset(dataset, data_dir, batch_size, world_size, rank, local_rank):
                         root=data_dir, train=False, download=download, transform=transform_test)
                 
                 if download: dist.barrier()
-	elif dataset == 'imagenet':
-		train_dataset = datasets.ImageFolder(
-			data_dir + '/train',
-			transform=transforms.Compose([
-				transforms.RandomResizedCrop(224),
-				transforms.RandomHorizontalFlip(),
-				transforms.ToTensor(),
-				transforms.Normalize(mean=[0.485, 0.456, 0.406],
-					std=[0.229, 0.224, 0.225])]))
-		test_dataset = datasets.ImageFolder(
-			data_dir + '/validation',
-			transform=transforms.Compose([
-				transforms.Resize(256),
-				transforms.CenterCrop(224),
-				transforms.ToTensor(),
-				transforms.Normalize(mean=[0.485, 0.456, 0.406],
-					std=[0.229, 0.224, 0.225])])
-			)
-	elif dataset == 'brain-segmentation':
-		return get_brain_segmentation_dataset(data_dir, batch_size, world_size, rank, local_rank)
-	
-	else:
-		raise NotImplementedError
-
-	return get_sampler_and_loader(train_dataset, test_dataset, batch_size, world_size, rank)
+        elif dataset == 'imagenet':
+                train_dataset = datasets.ImageFolder(
+                        data_dir + '/train',
+                        transform=transforms.Compose([
+                            transforms.RandomResizedCrop(224),
+                            transforms.RandomHorizontalFlip(),
+                            transforms.ToTensor(),
+                            transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                std=[0.229, 0.224, 0.225])]))
+                test_dataset = datasets.ImageFolder(
+                        data_dir + '/validation',
+                        transform=transforms.Compose([
+                            transforms.Resize(256),
+                            transforms.CenterCrop(224),
+                            transforms.ToTensor(),
+                            transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                std=[0.229, 0.224, 0.225])]))
+        elif dataset == 'brain-segmentation':
+                return get_brain_segmentation_dataset(data_dir, batch_size, world_size, rank, local_rank)
+        else:
+                raise NotImplementedError
+            
+        return get_sampler_and_loader(train_dataset, test_dataset, batch_size, world_size, rank)
 
 
 def get_sampler_and_loader(train_dataset, test_dataset, batch_size, world_size, rank):
