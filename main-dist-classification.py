@@ -167,6 +167,8 @@ def main():
     if verbose:
         if args.dataset == 'cifar10':
             summary(model, (args.batch_size, 3, 32, 32), device=device)
+        elif args.dataset == 'cifar100':
+            summary(model, (args.batch_size, 3, 32, 32), device=device)
         elif args.dataset == 'imagenet':
             summary(model, (args.batch_size, 3, 224, 224), device=device)
         else:
@@ -210,7 +212,7 @@ def main():
         backend.size(), args.warmup_epochs, args.milestone, args.lr_decay)
     lr_scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_schedule)
 
-    if args.dataset == 'cifar10':
+    if args.dataset in ['cifar10', 'cifar100']:
         loss_fn = torch.nn.CrossEntropyLoss()
     elif args.dataset == 'imagenet':
         loss_fn = LabelSmoothLoss(args.label_smoothing)
