@@ -418,17 +418,32 @@ class NGDProfiler(Optimizer):
         self.timing['broadcast_inv'] += start.elapsed_time(end)
 
     def compute_projection(self):
-        start = torch.cuda.Event(enable_timing=True)
-        end = torch.cuda.Event(enable_timing=True)
-        start.record()
+        if self.backend.size() == 1:
+            start = torch.cuda.Event(enable_timing=True)
+            end = torch.cuda.Event(enable_timing=True)
+            start.record()
 
-        for m in self.modules:
-            RDR = torch.block_diag(*self.m_RDR[m])
-            self.m_K[m] = RDR - RDR @ torch.inverse(self.m_K[m] + RDR) @ RDR
+            for m in self.modules:
+                RDR = self.m_RDR[m]
+                K = self.m_K[m]
+                self.m_K[m] = RDR - RDR @ torch.inverse(self.m_K[m] + RDR) @ RDR
 
-        end.record()
-        torch.cuda.synchronize()
-        self.timing['compute_projection'] += start.elapsed_time(end)
+            end.record()
+            torch.cuda.synchronize()
+            self.timing['compute_projection'] += start.elapsed_time(end)
+
+        else:
+            start = torch.cuda.Event(enable_timing=True)
+            end = torch.cuda.Event(enable_timing=True)
+            start.record()
+            
+            for m in self.modules:
+                RDR = torch.block_diag(*self.m_RDR[m])
+                self.m_K[m] = RDR - RDR @ torch.inverse(self.m_K[m] + RDR) @ RDR
+                
+            end.record()
+            torch.cuda.synchronize()
+            self.timing['compute_projection'] += start.elapsed_time(end)
 
     def _precondition(self, m):
         grad = m.weight.grad.data

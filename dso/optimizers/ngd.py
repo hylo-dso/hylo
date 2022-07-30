@@ -48,11 +48,11 @@ class NGDOptimizer(Optimizer):
 
         self.compression_ratio = compression_ratio
         self.adaptive = adaptive
-        self.randk = False
 
         self.acc_stats = False
         self.steps = 0
-
+        self.randk = not ((self.steps < self.iters_per_epoch * self.adaptive[0]) 
+                or (self.steps > self.iters_per_epoch * self.adaptive[1] and self.steps <= self.iters_per_epoch * self.adaptive[2]))
         self._prepare_model()
 
 
@@ -274,9 +274,13 @@ class NGDOptimizer(Optimizer):
 
     def compute_projection(self):
         for m in self.modules:
-            RDR = torch.block_diag(*self.m_RDR[m])
-            self.m_K[m] = RDR - RDR @ torch.inverse(self.m_K[m] + RDR) @ RDR
+            if isinstance(self.m_RDR[m], list):
+                RDR = torch.block_diag(*self.m_RDR[m])
+            else:
+                RDR = self.m_RDR[m]
 
+            K = self.m_K[m]
+            self.m_K[m] = (RDR - RDR @ K @ torch.inverse(torch.eye(K.shape[0]).to(K.device) + RDR @ K) @ RDR)
 
     def _precondition(self, m):
         grad = m.weight.grad.data
@@ -420,3 +424,4 @@ class NGDOptimizer(Optimizer):
         if self.adaptive is not None:
             self.randk = not ((self.steps < self.iters_per_epoch * self.adaptive[0]) 
                     or (self.steps > self.iters_per_epoch * self.adaptive[1] and self.steps <= self.iters_per_epoch * self.adaptive[2]))
+
